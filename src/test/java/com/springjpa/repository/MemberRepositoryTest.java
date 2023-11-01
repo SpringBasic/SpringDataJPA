@@ -25,4 +25,23 @@ class MemberRepositoryTest {
 
         assertThat(savedMember).isEqualTo(findMember);
     }
+
+    @Test
+    public void basicCRUDTest() {
+        Member member1 = new Member("member1");
+        Member member2 = new Member("member2");
+        Member savedMember1 = memberRepository.save(member1);
+        Member savedMember2 = memberRepository.save(member2);
+
+        Member foundMember1 = memberRepository.findById(savedMember1.getId()).get();
+        Member foundMember2 = memberRepository.findById(savedMember2.getId()).get();
+
+
+        // 동일성 보장
+        assertThat(savedMember1).isEqualTo(foundMember1);
+        assertThat(savedMember2).isEqualTo(foundMember2);
+
+        long count = memberRepository.count();
+        assertThat(count).isEqualTo(2);
+    }
 }
