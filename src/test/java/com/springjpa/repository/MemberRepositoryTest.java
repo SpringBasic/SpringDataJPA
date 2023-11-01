@@ -6,12 +6,17 @@ import com.springjpa.entity.Team;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Scanner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -240,5 +245,78 @@ class MemberRepositoryTest {
      * 데이터베이스에 있는 모든 데이터를 어플리케이션으로 가져오는건 x
      * -> Spring Data JPA 는 페이징 정렬 관련된 혁신적인 방법 제공
     **/
+
+    @Test
+    public void SpringDataJpaPagingTest() {
+        memberRepository.save(new Member("member1",10));
+        memberRepository.save(new Member("member2",10));
+        memberRepository.save(new Member("member3",10));
+        memberRepository.save(new Member("member4",10));
+        memberRepository.save(new Member("member5",10));
+        memberRepository.save(new Member("member6",10));
+        memberRepository.save(new Member("member7",10));
+        memberRepository.save(new Member("member8",10));
+        memberRepository.save(new Member("member9",10));
+
+        // << 파라 미터 >>
+        // Pageable, Sort
+
+        // shift + F6 : 전체 수정
+        PageRequest pageRequest
+                = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "name"));
+
+        int age = 10;
+
+        // 순수 JPA 페이징에서는 페이지 계산을 위해 count 쿼리 필요 with offset, limit !!!!!
+
+        // << 반환 타임 >>
+        // page : count 쿼리 결과를 포함 하는 페이징(total count 쿼리 함께 날림)
+        // slice : count 쿼리 없이 [다음 페이지]만 확인 가능
+        // list : count 쿼리 없이 결과 확인
+        Page<Member> result = memberRepository.findByAge(age, pageRequest);
+        List<Member> content = result.getContent();
+
+
+        for(Member m : content) {
+            System.out.println("m = " + m);
+        }
+
+        // Page 타입 에서 제공하는 메소드
+        assertThat(result.getSize()).isEqualTo(3);
+        assertThat(result.getNumber()).isEqualTo(0); // 현제 페이지
+        assertThat(result.getTotalPages()).isEqualTo(3); // 총 페이지
+        assertThat(result.isFirst()).isTrue(); // 첫 페이지 여부
+        assertThat(result.hasNext()).isTrue(); // 다음 페이지가 있는지 여부
+
+        // pageRequest 의 size + 1 만큼 보낸다.
+        Slice<Member> sliceResult = memberRepository.findMemberByAge(age, pageRequest);
+        
+        for(Member member : sliceResult.getContent()) {
+            System.out.println("member = " + member);
+        }
+
+        assertThat(sliceResult.getNumber()).isEqualTo(0);
+        assertThat(sliceResult.hasNext()).isTrue();
+        assertThat(sliceResult.isFirst()).isTrue();
+    }
+
+    @Test
+    public void SpringDataJpaPagingTestUsingDividedCountQuery() {
+
+        Team teamA = teamRepository.save(new Team("teamA"));
+        memberRepository.save(new Member("member1",10,teamA));
+        memberRepository.save(new Member("member2",10,teamA));
+        memberRepository.save(new Member("member3",10,teamA));
+        memberRepository.save(new Member("member4",10,teamA));
+        memberRepository.save(new Member("member5",10,teamA));
+        memberRepository.save(new Member("member6",10,teamA));
+        memberRepository.save(new Member("member7",10,teamA));
+        memberRepository.save(new Member("member8",10,teamA));
+        memberRepository.save(new Member("member9",10,teamA));
+
+
+        // content 관련 쿼리는 join 쿼리, count 쿼리는 순수 member 관련 쿼리
+        Page<Member> result = memberRepository.findByAgeDivideCountQuery(10, PageRequest.of(0, 3));
+    }
 }
 
