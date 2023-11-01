@@ -1,6 +1,8 @@
 package com.springjpa.repository;
 
+import com.springjpa.dto.MemberDto;
 import com.springjpa.entity.Member;
+import com.springjpa.entity.Team;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,6 +10,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MemberRepositoryTest {
 
     @Autowired MemberRepository memberRepository;
+    @Autowired TeamRepository teamRepository;
 
     @Test
     public void testMember() {
@@ -154,4 +158,57 @@ class MemberRepositoryTest {
             System.out.println("m = " + m);
         }
     }
+
+    /**
+     * - @Query 결과를 DTO 로 정의하기
+    **/
+
+    @Test
+    public void findMemberByQueryAnnotationToString() {
+        Member m1 = new Member("member1",10);
+        Member m2 = new Member("member2",20);
+        Member m3 = new Member("member3",30);
+        Member m4 = new Member("member2",20);
+
+        memberRepository.saveAll(Arrays.asList(m1,m2,m3,m4));
+
+        List<String> memberNames = memberRepository.findMembernames();
+
+        for(String name : memberNames) {
+            System.out.println("name = " + name);
+        }
+    }
+
+    /**
+     * - @Query 결과를 MemberDto 로 변환하기
+    **/
+    @Test
+    public void findMemberByQueryAnnotationToMemberDto() {
+
+        Team team1 = teamRepository.save(new Team("team1"));
+
+        memberRepository.save(new Member("member1",10,team1));
+        memberRepository.save(new Member("member2",20,team1));
+
+        List<MemberDto> result = memberRepository.findMemberToMemberDto();
+
+        for(MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    /**
+     * - 컬렉션 파라미터 바인딩
+    **/
+    @Test
+    public void findMemberByCollectionParameterBinding() {
+        memberRepository.save(new Member("member1",10));
+        memberRepository.save(new Member("member2",20));
+
+        List<Member> members = memberRepository.findMemberFromNames(Arrays.asList("member1", "member2"));
+        for(Member m : members) {
+            System.out.println("m = " + m);
+        }
+    }
 }
+
