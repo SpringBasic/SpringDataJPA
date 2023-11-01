@@ -135,4 +135,23 @@ class MemberRepositoryTest {
             System.out.println("member = " + member);
         }
     }
+
+    /**
+     * - 레포지토리 메소드에 @Query 쿼리 정의하기
+    **/
+    @Test
+    public void findMemberByQueryAnnotation() {
+        Member m1 = new Member("member1",10);
+        Member m2 = new Member("member2",20);
+        Member m3 = new Member("member3",30);
+        Member m4 = new Member("member2",20);
+        
+        memberRepository.saveAll(Arrays.asList(m1,m2,m3,m4));
+
+        List<Member> result = memberRepository.findByJpql("member2", 20);
+        
+        for(Member m : result) {
+            System.out.println("m = " + m);
+        }
+    }
 }

@@ -2,6 +2,8 @@ package com.springjpa.repository;
 
 import com.springjpa.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -30,4 +32,9 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     List<Member> queryFirst3ByOrderByNameDesc();
 
     List<Member> findFirst3ByName(String name);
+
+    // 메소드 이름으로 쿼리 생성은 길어 지면 너무 복잡 해지는 문제가 있음
+    // 오타가 발생한 경우, 애플리케이션 실행 시 에러 발생
+    @Query("select m from Member m where m.name = :name and m.age = :age")
+    List<Member> findByJpql(@Param("name") String name, @Param("age") int age);
 }
