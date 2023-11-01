@@ -71,4 +71,24 @@ public class MemberJpaRepositoryTest {
         Member foundMember3 = memberJpaRepository.save(new Member("member3"));
         foundMember3.changeName("new Member3"); // 변경된 new Member3 으로 DB 저장
     }
+
+
+    // Spring Data JPA 가 제공하는 마법
+    // 1. 메소드 이름으로 쿼리 실행
+    // 2. 메소드 이름으로 JPA NamedQuery 호출
+    // 3. @Query 사용해서 인터페이스에 쿼리 직접 정의
+
+    @Test
+    public void findByNameAndAgeGreaterThan() {
+        Member m1 = new Member("member1", 10);
+        Member m2 = new Member("member2", 20);
+
+        memberJpaRepository.save(m1);
+        memberJpaRepository.save(m2);
+
+        List<Member> result = memberJpaRepository.findByUsernameAndAgeGreaterThan("member1", 13);
+        for (Member member : result) {
+            System.out.println("member = " + member);
+        }
+    }
 }
