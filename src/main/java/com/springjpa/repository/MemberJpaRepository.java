@@ -5,7 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import java.util.List;
+import java.util.Optional;
 
+/**
+ * - 순수 JPA 기반 레포지토리
+**/
 @Repository
 public class MemberJpaRepository {
 
@@ -19,5 +24,24 @@ public class MemberJpaRepository {
 
     public Member find(Long id) {
         return em.find(Member.class, id);
+    }
+
+    public void delete(Member member) {
+        em.remove(member);
+    }
+
+    public List<Member> findAll() {
+        return em.createQuery("select m from Member m",Member.class)
+                .getResultList();
+    }
+
+    public Optional<Member> findMemberById(Long id) {
+        // nullable return value
+        return Optional.ofNullable(em.find(Member.class,id));
+    }
+
+    public long count() {
+        return em.createQuery("select count(m) from Member m", Long.class)
+                .getSingleResult();
     }
 }

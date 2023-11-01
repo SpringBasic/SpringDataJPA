@@ -50,4 +50,9 @@ public class Member {
         this.team = team;
         team.getMembers().add(this); // 객체 지향성
     }
+
+    /* 이름 변경 */
+    public void changeName(String name) {
+        this.name = name;
+    }
 }

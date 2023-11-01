@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -39,5 +41,34 @@ public class MemberJpaRepositoryTest {
         assertThat(savedMember).isEqualTo(findMember);
     }
 
+    @Test
+    public void basicCRUD() {
+        Member member1 = new Member("member1");
+        Member member2 = new Member("member2");
 
+
+        // 1. 저장
+        Member savedMember1 = memberJpaRepository.save(member1);
+        Member savedMember2 = memberJpaRepository.save(member2);
+
+        // 2. 단건 조회
+        Member foundMember1 = memberJpaRepository.findMemberById(savedMember1.getId()).get();
+        Member foundMember2 = memberJpaRepository.findMemberById(savedMember2.getId()).get();
+
+        // 3. 리스트 검증
+        List<Member> members = memberJpaRepository.findAll();
+        assertThat(members.size()).isEqualTo(2);
+
+        // 4. 삭세
+        memberJpaRepository.delete(savedMember1);
+        memberJpaRepository.delete(savedMember2);
+
+        // 5. 갯수 조회
+        long count = memberJpaRepository.count();
+        assertThat(count).isEqualTo(0);
+
+        // 6. 변경 감지(Dirty Checking)
+        Member foundMember3 = memberJpaRepository.save(new Member("member3"));
+        foundMember3.changeName("new Member3"); // 변경된 new Member3 으로 DB 저장
+    }
 }
