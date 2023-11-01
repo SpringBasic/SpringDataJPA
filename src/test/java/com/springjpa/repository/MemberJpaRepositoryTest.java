@@ -91,4 +91,41 @@ public class MemberJpaRepositoryTest {
             System.out.println("member = " + member);
         }
     }
+
+
+    @Test
+    public void pagingTest() {
+        memberJpaRepository.save(new Member("member1",10));
+        memberJpaRepository.save(new Member("member2",10));
+        memberJpaRepository.save(new Member("member3",10));
+        memberJpaRepository.save(new Member("member4",10));
+        memberJpaRepository.save(new Member("member5",10));
+        memberJpaRepository.save(new Member("member6",10));
+        memberJpaRepository.save(new Member("member7",10));
+        memberJpaRepository.save(new Member("member8",10));
+        memberJpaRepository.save(new Member("member9",10));
+
+        int age = 10;
+        int offset = 1;
+        int limit = 3;
+
+        // offset + limit 데이터 리스트 가져오기
+        List<Member> members = memberJpaRepository.findByPage(age, offset, limit);
+        long count = memberJpaRepository.totalCount(age);
+
+        for(Member member : members) {
+            // member 8 ~ member 6 (3 개)
+            System.out.println("member = " + member);
+        }
+
+        // 페이지 계산 공식 적용 ...
+        // totalPage = totalCount / size(한 페이지당 데이터 수) ...
+        // 마지막 페이지 ..
+        // 최초 페이지
+
+        // ex ) 1 page = offset (0), limit (10) , 2 page = offset(11), limit(10)
+        // 이와 같은 고대로부터 내려오는(?) 공식 적용하는게 너무 번거로움
+
+        assertThat(count).isEqualTo(9);
+    }
 }

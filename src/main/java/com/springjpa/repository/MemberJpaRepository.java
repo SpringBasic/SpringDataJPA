@@ -52,4 +52,26 @@ public class MemberJpaRepository {
                 .setParameter("age",age)
                 .getResultList();
     }
+
+    /**
+     * - 순수 JPA 페이징 + 정렬
+     * offset : 시작 위치 , limit : offset 으로부터  몇개?
+     * 나이가 10살 이면서 이름으로 내림차순 + 페이징
+    **/
+    public List<Member> findByPage(int age, int offset, int limit) {
+        return em.createQuery("select m from Member m where m.age = :age order by m.name desc",Member.class)
+                .setParameter("age", age)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
+    /**
+     * 조건에 맞는 데이터 갯수 가져오기
+    **/
+    public long totalCount(int age) {
+        return em.createQuery("select count(m) from Member m where m.age = :age",Long.class)
+                .setParameter("age", age)
+                .getSingleResult();
+    }
 }

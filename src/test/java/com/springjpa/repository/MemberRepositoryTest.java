@@ -210,5 +210,35 @@ class MemberRepositoryTest {
             System.out.println("m = " + m);
         }
     }
+
+    /**
+     * - 유연한 반환 타입 조회
+    **/
+    @Test
+    public void findMemberUsingFlexibleReturnType() {
+        memberRepository.save(new Member("member1",10));
+        memberRepository.save(new Member("member2",20));
+
+        List<Member> members = memberRepository.findListByName("member2");
+
+
+        // 단건 조회일 때, 없으면(getSingleResult) 순수 JPA 는 NoResultException 터트리지만,
+        // Spring Data JPA 는 자동 으로 감싸서 예외 처리 -> null
+        Member oneMember = memberRepository.findOneByName("member1");
+
+        Member optionalMember = memberRepository.findOptionalByName("member1").get();
+        for(Member m : members) {
+            System.out.println("m = " + m);
+        }
+
+        System.out.println(oneMember);
+        System.out.println(optionalMember);
+    }
+
+    /**
+     * - 페이징 & 정렬
+     * 데이터베이스에 있는 모든 데이터를 어플리케이션으로 가져오는건 x
+     * -> Spring Data JPA 는 페이징 정렬 관련된 혁신적인 방법 제공
+    **/
 }
 

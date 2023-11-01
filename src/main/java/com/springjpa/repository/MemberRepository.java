@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * - Spring Data JPA 가 애플리케이션 로딩 시점에 프록시 형태로 구현 객체를 자동 으로 생성
@@ -60,4 +61,15 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     // 멤버쉽 조건 -> 유한한 집합을 하나의 단일 조건 으로 표현식 구성 가능
     @Query("select m from Member m where m.name in :names")
     List<Member> findMemberFromNames(@Param("names") Collection<String> names);
+
+
+    // Spring Data JPA 는 유연한 반환 타입 지원
+    // 리스트 조회
+    List<Member> findListByName(String name);
+
+    // 단건 조회
+    Member findOneByName(String name);
+
+    // optional<단건> 조회
+    Optional<Member> findOptionalByName(String name);
 }
