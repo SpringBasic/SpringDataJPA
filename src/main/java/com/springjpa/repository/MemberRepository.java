@@ -4,6 +4,7 @@ import com.springjpa.dto.MemberDto;
 import com.springjpa.entity.Member;
 import com.springjpa.repository.custom.MemberRepositoryCustom;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.*;
@@ -113,7 +114,11 @@ public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepo
 //    List<Member> findAll();
 
 
-    Page<Member> findAll(Pageable pageable);
+
+    Page<Member> findPageBy(Pageable pageable);
+
+
+    Slice<Member> findSliceBy(Pageable pageable);
 
 
     // 메소드 이름으로 쿼리 생성 방식에서 @EntityGraph 적용 가능
