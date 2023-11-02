@@ -5,11 +5,13 @@ import com.springjpa.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import javax.persistence.Entity;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -89,7 +91,6 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
 
     // 3. 반환 타입이 Page 인 경우 Count 쿼리를 분리 가능
     // 예를 들어, Join 쿼리인 경우 Count 쿼리도 조인 동작 -> 성능 저하
-
     @Query(value = "select m from Member m inner join m.team t",
     countQuery = "select count(m) from Member m")
     Page<Member> findByAgeDivideCountQuery(int age, Pageable pageable);
@@ -101,4 +102,20 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     @Modifying(clearAutomatically = true)
     @Query("update Member m set m.age = m.age + 1 where m.age >= :age")
     int bulkAgePlus(@Param("age") int age);
+
+    // Member 와 관련된 Team 을 전부 한번에 가져옴
+    // left join -> 두 테이블 중 해당 열의 대한 데이터를 한 테이블만 가지고 있어도 결과 셋에 포함
+    @Query("select m from Member m left join fetch m.team t")
+    List<Member> findMemberByFetchJoin();
+
+    // member 전체 조회 시, 자동 으로 fetch join
+    // fetch join 관련 jpql 짜기 귀찮을 때 사용
+    // fetch join 은 기본적 으로 left outer join ( team(team_id) 없는 member 도 조회 )
+    @EntityGraph(attributePaths = {"team"})
+    List<Member> findAll();
+
+
+    // 메소드 이름으로 쿼리 생성 방식에서 @EntityGraph 적용 가능
+    @EntityGraph(attributePaths = ("team"))
+    List<Member> findEntityGraphByName(@Param("name") String name);
 }

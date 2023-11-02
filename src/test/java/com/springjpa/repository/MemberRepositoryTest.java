@@ -355,5 +355,107 @@ class MemberRepositoryTest {
         System.out.println(member9.getAge());
         assertThat(changedCount).isEqualTo(8);
     }
+
+
+    @Test
+    public void findMemberLazy() {
+
+        // member1 -> TeamA
+        // member2 -> TeamB
+        // member 조회 시 실제 team 엔티티 객체 조회 x -> 프록시 객체로 조회
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.saveAll(Arrays.asList(teamA,teamB));
+
+        Member member1 = new Member("member1",10,teamA);
+        Member member2 = new Member("member2",20,teamB);
+        memberRepository.saveAll(Arrays.asList(member1,member2));
+
+        em.flush();
+        em.clear();
+
+        List<Member> result = memberRepository.findAll();
+
+        for(Member member : result) {
+            System.out.println("member = " + member);
+            // getClass 호출 시, 프록시 객체 가져옴
+            // N + 1 문제 발생
+            // : 연관관계의 지연로딩으로 인해 발생하는 문제로, 예를 들어 하나의 쿼리로 N 개의 결과를 가져올 때
+            // 추후 N 개의 엔티티의 연관관계를 맺고 있는 엔티티를 가져오기 위해 N 번의 추가적인 쿼리가 더 나가는 문제
+            // 데이터베이스 서버에 접근하기 위해 네트워크를 거쳐야 하기 때문에 성능상 좋지 않음.
+            // fetch join 으로 일부 해결 가능
+            System.out.println("member.getTeam().getClass() = " + member.getTeam().getClass());
+        }
+    }
+
+
+    /**
+     * - fetch join 간단 실습
+     * : fetch join : 연관된 데이터를 join 을 통해 한번에 가져 오는 join 방식
+    **/
+    @Test
+    public void findMemberUsingFetchJoin() {
+        // member1 -> TeamA
+        // member2 -> TeamB
+        // member 조회 시 실제 team 엔티티 객체 조회 x -> 프록시 객체로 조회
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.saveAll(Arrays.asList(teamA, teamB));
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamB);
+        memberRepository.saveAll(Arrays.asList(member1, member2));
+
+        em.flush();
+        em.clear();
+
+        List<Member> result = memberRepository.findMemberByFetchJoin();
+
+        for (Member m : result) {
+            System.out.println("m = " + m);
+            // 프록시 객체 x -> 순수 Team 객체 가져옴!!!!!
+            System.out.println("m.getTeam().getClass() = " + m.getTeam().getClass());
+        }
+    }
+
+    @Test
+    public void findAllMemberUsingEntityGraph() {
+
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+
+        teamRepository.saveAll(Arrays.asList(teamA,teamB));
+
+        Member member1 = new Member("member1",10,teamA);
+        Member member2 = new Member("member2",20,teamB);
+
+        memberRepository.saveAll(Arrays.asList(member1,member2));
+
+
+        List<Member> members = memberRepository.findAll();
+
+        for(Member member : members) {
+            System.out.println("member = " + member);
+        }
+    }
+
+
+    @Test
+    public void findMemberUsingEntityGraph() {
+
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+
+        teamRepository.saveAll(Arrays.asList(teamA,teamB));
+
+        Member member1 = new Member("member1",10,teamA);
+        Member member2 = new Member("member2",20,teamB);
+
+        memberRepository.saveAll(Arrays.asList(member1,member2));
+
+        List<Member> members = memberRepository.findEntityGraphByName("member1");
+
+
+    }
 }
 
