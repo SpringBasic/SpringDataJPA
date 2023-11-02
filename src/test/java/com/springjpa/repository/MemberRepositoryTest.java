@@ -500,7 +500,13 @@ class MemberRepositoryTest {
         em.clear();
 
         List<Member> members = memberRepository.findLockMemberByName("member1");
-        // select 쿼리 마지막에 for update 붙음
+        // select 쿼리 마지막에 for update 붙습
+    }
+
+    @Test
+    public void customSpringDataJPATest() {
+        List<Member> memberCustom = memberRepository.findMemberCustom();
+
     }
 }
 

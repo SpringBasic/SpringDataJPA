@@ -2,6 +2,7 @@ package com.springjpa.repository;
 
 import com.springjpa.dto.MemberDto;
 import com.springjpa.entity.Member;
+import com.springjpa.repository.custom.MemberRepositoryCustom;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -20,7 +21,7 @@ import java.util.Optional;
  * - Spring Data JPA 가 애플리케이션 로딩 시점에 프록시 형태로 구현 객체를 자동 으로 생성
  * - @Repository 없어도 동작, Spring Data JPA 가 프록시 형태로 구현 객체를 만들고 Bean 등록
 **/
-public interface MemberRepository extends JpaRepository<Member,Long> {
+public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepositoryCustom {
     List<Member> findByNameAndAgeGreaterThan(String name, int age);
 
     List<Member> findHelloBy();
