@@ -109,8 +109,11 @@ public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepo
     // member 전체 조회 시, 자동 으로 fetch join
     // fetch join 관련 jpql 짜기 귀찮을 때 사용
     // fetch join 은 기본적 으로 left outer join ( team(team_id) 없는 member 도 조회 )
-    @EntityGraph(attributePaths = {"team"})
-    List<Member> findAll();
+//    @EntityGraph(attributePaths = {"team"})
+//    List<Member> findAll();
+
+
+    Page<Member> findAll(Pageable pageable);
 
 
     // 메소드 이름으로 쿼리 생성 방식에서 @EntityGraph 적용 가능
