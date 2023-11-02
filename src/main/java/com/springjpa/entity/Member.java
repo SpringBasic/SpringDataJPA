@@ -2,16 +2,15 @@ package com.springjpa.entity;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 
 @Slf4j
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(of = {"id","name","age"})
+@ToString(of = {"id", "name", "age"})
 @Entity
-public class Member {
+public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +33,7 @@ public class Member {
     public Member(String name, int age, Team team) {
         this.name = name;
         this.age = age;
-        if(team != null) { // 기존에 Team 이 존재하는 경우
+        if (team != null) { // 기존에 Team 이 존재하는 경우
             this.changeTeam(team);
         }
     }

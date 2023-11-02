@@ -8,9 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.Entity;
 import javax.persistence.LockModeType;
 import javax.persistence.QueryHint;
 import java.util.Collection;

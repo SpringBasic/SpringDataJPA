@@ -1,6 +1,8 @@
 package com.springjpa.entity;
 
+import com.springjpa.repository.MemberRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +13,9 @@ import java.util.List;
 @SpringBootTest
 @Transactional
 public class MemberTest {
+
+    @Autowired
+    MemberRepository memberRepository;
 
     @PersistenceContext
     EntityManager em;
@@ -34,8 +39,8 @@ public class MemberTest {
         em.persist(member3);
         em.persist(member4);
         em.persist(member5);
-        // 1차 캐시 저장
 
+        // 1차 캐시 저장
         List<Member> result = em.createQuery("select m from Member m", Member.class)
                 .getResultList();
 
@@ -43,5 +48,23 @@ public class MemberTest {
             System.out.println("member = " + m);
             System.out.println("m.getTeam().getName() = " + m.getTeam().getName());
         }
+    }
+
+    @Test
+    public void auditingTest() throws InterruptedException {
+
+        Member member = new Member("member1");
+        memberRepository.save(member); // insert -> 영속성 컨텍스트
+
+        Thread.sleep(100);
+        member.changeName("new_member1"); // update -> 영속성 컨텍스( 모든 필드 업데이트 )
+
+
+        em.flush();
+        em.clear();
+
+        Member foundMember = memberRepository.findOneByName("new_member1");
+        System.out.println("member.getCreatedAt() = " + foundMember.getCreatedAt());
+        System.out.println("member.getUpdatedAt() = " + foundMember.getUpdatedAt());
     }
 }

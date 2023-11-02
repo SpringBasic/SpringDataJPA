@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
 @ToString(of = {"id","name"})
 @Entity
-public class Team {
+public class Team extends BaseEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
@@ -32,4 +32,7 @@ public class Team {
     public Team(String name) {
         this.name = name;
     }
+
+    ////        em.flush(); // @PreUpdate
+    ////        em.clear();
 }
