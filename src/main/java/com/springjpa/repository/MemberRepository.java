@@ -5,13 +5,13 @@ import com.springjpa.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.Entity;
+import javax.persistence.LockModeType;
+import javax.persistence.QueryHint;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -118,4 +118,20 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     // 메소드 이름으로 쿼리 생성 방식에서 @EntityGraph 적용 가능
     @EntityGraph(attributePaths = ("team"))
     List<Member> findEntityGraphByName(@Param("name") String name);
+
+    // 김영한님 왈 :
+    // 일반적 으로 간단한 경우 : 직접 jpql 을 이용해서 페치 조인 구현
+    // 귀찮은 경우, 복잡한 경우 : @EntityGraph 사용
+    // Spring Data JPA 보다 Spring JPA 가 더 중요!!!!
+
+
+    // Query Hint
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly",value = "true"))
+    Member findReadOnlyByName(String name);
+
+
+    // LOCK
+    // 읽기 락 vs 쓰기 락
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Member> findLockMemberByName(String name);
 }

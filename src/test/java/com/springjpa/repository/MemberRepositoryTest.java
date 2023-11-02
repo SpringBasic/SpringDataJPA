@@ -10,11 +10,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,6 +33,7 @@ class MemberRepositoryTest {
     TeamRepository teamRepository;
     @PersistenceContext
     EntityManager em;
+
 
     @Test
     public void testMember() {
@@ -455,7 +458,49 @@ class MemberRepositoryTest {
 
         List<Member> members = memberRepository.findEntityGraphByName("member1");
 
+    }
 
+    @Test
+    public void withNoQueryHint() {
+        Member result = memberRepository.save(new Member("member1", 10));
+        em.flush(); // persistence context db 동기화 ( 아직 남아 있음 )
+        System.out.println(" after insert query");
+        em.clear(); // persistence context 다 날리기
+
+        // db select query
+        Member member = memberRepository.findOneByName("member1");
+
+        // db update query
+        // 변경 감지(dirty check) => 스냅샷과 비교해서 변경 감지 시 flush 할 때 수정 쿼리 생성 해서 보냄
+        // 변경 감지의 단점 : 스냅샷과 변경 상태의 두 버전을 관리해야 한다. -> 자원 소모
+        member.changeName("new_member1");
+    }
+
+    @Test
+    public void withQueryHint() {
+        Member result = memberRepository.save(new Member("member1",10));
+        em.flush();
+//        em.clear();
+
+        /* em.clear() 가 없다면, result 가 영속성 컨텍스트에 남아 있음 */
+        /* 그 후, readOnly 을 해도 영속성 컨텍스트에 이미 있는 것을 가져옴 */
+        /* 의도대로 readOnly 속성을 통해 변경 감지 동작이 안되게 하려면 영속성 컨텍스트 초기화 */
+
+        // readOnly 인 경우 수정 x -> 스냅샷 만들지 않고 자원 소모 x -> 성능 최적화
+        Member member1 = memberRepository.findReadOnlyByName("member1");
+
+        // 변경 감지 작동 x -> 스냅샷이 아예 없으니깐 작동 x
+        member1.changeName("new_member1");
+    }
+
+    @Test
+    public void findMemberUsingLock() {
+        Member result = memberRepository.save(new Member("member1", 10));
+        em.flush();
+        em.clear();
+
+        List<Member> members = memberRepository.findLockMemberByName("member1");
+        // select 쿼리 마지막에 for update 붙음
     }
 }
 
