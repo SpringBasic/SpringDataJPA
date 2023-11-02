@@ -95,15 +95,15 @@ public class MemberJpaRepositoryTest {
 
     @Test
     public void pagingTest() {
-        memberJpaRepository.save(new Member("member1",10));
-        memberJpaRepository.save(new Member("member2",10));
-        memberJpaRepository.save(new Member("member3",10));
-        memberJpaRepository.save(new Member("member4",10));
-        memberJpaRepository.save(new Member("member5",10));
-        memberJpaRepository.save(new Member("member6",10));
-        memberJpaRepository.save(new Member("member7",10));
-        memberJpaRepository.save(new Member("member8",10));
-        memberJpaRepository.save(new Member("member9",10));
+        memberJpaRepository.save(new Member("member1", 10));
+        memberJpaRepository.save(new Member("member2", 10));
+        memberJpaRepository.save(new Member("member3", 10));
+        memberJpaRepository.save(new Member("member4", 10));
+        memberJpaRepository.save(new Member("member5", 10));
+        memberJpaRepository.save(new Member("member6", 10));
+        memberJpaRepository.save(new Member("member7", 10));
+        memberJpaRepository.save(new Member("member8", 10));
+        memberJpaRepository.save(new Member("member9", 10));
 
         int age = 10;
         int offset = 1;
@@ -113,7 +113,7 @@ public class MemberJpaRepositoryTest {
         List<Member> members = memberJpaRepository.findByPage(age, offset, limit);
         long count = memberJpaRepository.totalCount(age);
 
-        for(Member member : members) {
+        for (Member member : members) {
             // member 8 ~ member 6 (3 개)
             System.out.println("member = " + member);
         }
@@ -127,5 +127,24 @@ public class MemberJpaRepositoryTest {
         // 이와 같은 고대로부터 내려오는(?) 공식 적용하는게 너무 번거로움
 
         assertThat(count).isEqualTo(9);
+    }
+
+    @Test
+    public void bulkUpdate() {
+        memberJpaRepository.save(new Member("member1", 10));
+        memberJpaRepository.save(new Member("member2", 20));
+        memberJpaRepository.save(new Member("member3", 30));
+        memberJpaRepository.save(new Member("member4", 40));
+        memberJpaRepository.save(new Member("member5", 50));
+        memberJpaRepository.save(new Member("member6", 60));
+        memberJpaRepository.save(new Member("member7", 70));
+        memberJpaRepository.save(new Member("member8", 80));
+        memberJpaRepository.save(new Member("member9", 90));
+
+
+        // 20 살 이상인 사람은 20 + 1
+        int result = memberJpaRepository.bulkAgePlus(20);
+
+        assertThat(result).isEqualTo(8);
     }
 }

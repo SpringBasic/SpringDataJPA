@@ -74,4 +74,16 @@ public class MemberJpaRepository {
                 .setParameter("age", age)
                 .getSingleResult();
     }
+
+    /**
+     * 벌크성 업데이트 쿼리
+     * - 특정 조건을 만족하는 대상 업데이트
+     * using executeUpdate
+    **/
+    public int bulkAgePlus(int age) {
+        // executeUpdate() 결과는 변경된 행(레코드) 갯수
+        return em.createQuery("update Member m set m.age = m.age + 1 where m.age >= :age")
+                .setParameter("age",age)
+                .executeUpdate();
+    }
 }

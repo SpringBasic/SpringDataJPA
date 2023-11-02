@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -78,6 +79,7 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
 
 
     // Spring Data JPA 페이징 + 정렬
+    // page 는 ZerobasedIndex ( 0 부터 시작 )
     // 1. Page
     Page<Member> findByAge(int age, Pageable pageable);
 
@@ -91,4 +93,12 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     @Query(value = "select m from Member m inner join m.team t",
     countQuery = "select count(m) from Member m")
     Page<Member> findByAgeDivideCountQuery(int age, Pageable pageable);
+
+
+    // 벌크성 수정 쿼리
+    // @Modifying -> executeUpdate
+    // clearAutomatically -> 벌크 쿼리 이후 자동 클리어
+    @Modifying(clearAutomatically = true)
+    @Query("update Member m set m.age = m.age + 1 where m.age >= :age")
+    int bulkAgePlus(@Param("age") int age);
 }
