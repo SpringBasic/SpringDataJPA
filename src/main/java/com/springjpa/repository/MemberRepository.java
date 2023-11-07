@@ -19,7 +19,7 @@ import java.util.Optional;
  * - Spring Data JPA 가 애플리케이션 로딩 시점에 프록시 형태로 구현 객체를 자동 으로 생성
  * - @Repository 없어도 동작, Spring Data JPA 가 프록시 형태로 구현 객체를 만들고 Bean 등록
 **/
-public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepositoryCustom {
+public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepositoryCustom , JpaSpecificationExecutor<Member> {
     List<Member> findByNameAndAgeGreaterThan(String name, int age);
 
     List<Member> findHelloBy();
@@ -140,4 +140,10 @@ public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepo
     // 읽기 락 vs 쓰기 락
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Member> findLockMemberByName(String name);
+
+    List<UsernameOnly> findProjectionsByName(String name);
+
+    List<UsernameOnlyDto> findProjectionsDtoByName(@Param("name") String name);
+
+    <T> List<T> findProjectionsByName(@Param("name") String name, Class<T> type);
 }

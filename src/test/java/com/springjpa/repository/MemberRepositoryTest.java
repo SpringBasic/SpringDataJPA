@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
@@ -507,6 +508,80 @@ class MemberRepositoryTest {
     public void customSpringDataJPATest() {
         List<Member> memberCustom = memberRepository.findMemberCustom();
 
+    }
+
+    @Test
+    public void specBasicTest() {
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1",0 ,teamA);
+        Member m2 = new Member("m2",0 ,teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        /* specification */
+        Specification<Member> spec = MemberSpec.username("m1").and(MemberSpec.teamName("teamA"));
+        List<Member> result = memberRepository.findAll(spec);
+
+        for (Member member : result) {
+            System.out.println("member = " + member);
+        }
+    }
+
+    // Projection : select 절에 필요한 데이터만 조회
+    @Test
+    public void projectionTest() {
+
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1",0 ,teamA);
+        Member m2 = new Member("m2",0 ,teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+
+        // Username 만 조회
+        List<UsernameOnly> result = this.memberRepository.findProjectionsByName("m1");
+
+        for (UsernameOnly usernameOnly : result) {
+            System.out.println("usernameOnly = " + usernameOnly);
+        }
+
+        em.flush();
+        em.clear();
+
+        List<UsernameOnlyDto> result02 = this.memberRepository.findProjectionsDtoByName("m1");
+
+        for (UsernameOnly usernameOnly : result) {
+            System.out.println("usernameOnly = " + usernameOnly);
+        }
+
+
+        em.flush();
+        em.clear();
+
+        List<UsernameOnly> m11 = this.memberRepository.findProjectionsByName("m1", UsernameOnly.class);
+
+        
+        em.flush();
+        em.clear();
+
+        // 주의
+        // 프로젝션 대상이 ROOT 가 아니면
+        // LEFT OUTER JOIN 처리 -> 모든 필드를 Select 해서 엔티티로 조회한 다음에 계산
+        List<NestedClosedProjections> result03 = this.memberRepository.findProjectionsByName("m1", NestedClosedProjections.class);
+
+        for (NestedClosedProjections nestedClosedProjections : result03) {
+            System.out.println("nestedClosedProjections = " + nestedClosedProjections);
+        }
     }
 }
 
