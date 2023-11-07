@@ -583,5 +583,32 @@ class MemberRepositoryTest {
             System.out.println("nestedClosedProjections = " + nestedClosedProjections);
         }
     }
+    // Native Query 는 사용하지 않는 게 좋음, 정말 어쩔 수 없을 때 사용
+    // DTO 을 뽑을 때 제약이 많음
+    
+    @Test
+    public void nativeQueryTest() {
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1",0 ,teamA);
+        Member m2 = new Member("m2",0 ,teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        Page<MemberProjection> byNativeProjection = this.memberRepository.findByNativeProjection(PageRequest.of(0, 10));
+        List<MemberProjection> content = byNativeProjection.getContent();
+
+        for (MemberProjection memberProjection : content) {
+            System.out.println("memberProjection.getId() = " + memberProjection.getId());
+            System.out.println("memberProjection = " + memberProjection.getName());
+            System.out.println("memberProjection.getTeamName() = " + memberProjection.getTeamName());
+        }
+    }
+
+
 }
 

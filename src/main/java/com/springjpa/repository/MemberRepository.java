@@ -4,11 +4,11 @@ import com.springjpa.dto.MemberDto;
 import com.springjpa.entity.Member;
 import com.springjpa.repository.custom.MemberRepositoryCustom;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
+
 import javax.persistence.LockModeType;
 import javax.persistence.QueryHint;
 import java.util.Collection;
@@ -18,8 +18,8 @@ import java.util.Optional;
 /**
  * - Spring Data JPA 가 애플리케이션 로딩 시점에 프록시 형태로 구현 객체를 자동 으로 생성
  * - @Repository 없어도 동작, Spring Data JPA 가 프록시 형태로 구현 객체를 만들고 Bean 등록
-**/
-public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepositoryCustom , JpaSpecificationExecutor<Member> {
+ **/
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom, JpaSpecificationExecutor<Member> {
     List<Member> findByNameAndAgeGreaterThan(String name, int age);
 
     List<Member> findHelloBy();
@@ -91,7 +91,7 @@ public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepo
     // 3. 반환 타입이 Page 인 경우 Count 쿼리를 분리 가능
     // 예를 들어, Join 쿼리인 경우 Count 쿼리도 조인 동작 -> 성능 저하
     @Query(value = "select m from Member m inner join m.team t",
-    countQuery = "select count(m) from Member m")
+            countQuery = "select count(m) from Member m")
     Page<Member> findByAgeDivideCountQuery(int age, Pageable pageable);
 
 
@@ -114,7 +114,6 @@ public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepo
 //    List<Member> findAll();
 
 
-
     Page<Member> findPageBy(Pageable pageable);
 
 
@@ -132,7 +131,7 @@ public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepo
 
 
     // Query Hint
-    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly",value = "true"))
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
     Member findReadOnlyByName(String name);
 
 
@@ -146,4 +145,14 @@ public interface MemberRepository extends JpaRepository<Member,Long>, MemberRepo
     List<UsernameOnlyDto> findProjectionsDtoByName(@Param("name") String name);
 
     <T> List<T> findProjectionsByName(@Param("name") String name, Class<T> type);
+
+
+    @Query(value = "select * from member where name = ?", nativeQuery = true)
+    Member findByNativeQuery(String name);
+
+    @Query(value = "select m.member_id as id, m.name, t.name as teamName" +
+            "from member m left join team t ON m.team_id = t.team_id",
+            countQuery = "select count(*) from member",
+            nativeQuery = true)
+    Page<MemberProjection> findByNativeProjection(Pageable pageable);
 }
